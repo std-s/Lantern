@@ -46,19 +46,24 @@ extension LanternAnimatedTransitioning {
     }
     
     public func fastSnapshot(with view: UIView) -> UIView? {
-        UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, UIScreen.main.scale)
-        view.drawHierarchy(in: view.bounds, afterScreenUpdates: false)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
+        let renderer = UIGraphicsImageRenderer(size: view.bounds.size, format: UIGraphicsImageRendererFormat.default())
+        
+        let image = renderer.image { _ in
+            view.drawHierarchy(in: view.bounds, afterScreenUpdates: false)
+        }
+        
         return UIImageView(image: image)
     }
     
     public func snapshot(with view: UIView) -> UIView? {
-        UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, UIScreen.main.scale)
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
-        view.layer.render(in: context)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
+        let renderer = UIGraphicsImageRenderer(size: view.bounds.size)
+
+        let image = renderer.image { context in
+            let cgContext = context.cgContext
+            view.layer.render(in: cgContext)
+        }
+
         return UIImageView(image: image)
     }
+
 }
